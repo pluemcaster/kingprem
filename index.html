@@ -512,18 +512,15 @@
         };
 
         const App = () => {
-            const [session, setSession] = useState(null);
-            const [loading, setLoading] = useState(true);
-            const isConfigured = SUPABASE_URL !== 'YOUR_SUPABASE_URL';
-            useEffect(() => {
-                if (!isConfigured) { setLoading(false); return; }
-                db.auth.getSession().then(({ data: { session } }) => { setSession(session); setLoading(false); });
-                const { data: { subscription } } = db.auth.onAuthStateChange((_e, s) => setSession(s));
-                return () => subscription.unsubscribe();
-            }, [isConfigured]);
-            if (loading) return <div className="min-h-screen flex items-center justify-center bg-gray-50"><Spinner /></div>;
-            if (!isConfigured) return <SetupPage />;
-            return !session ? <AuthPage /> : <MainApp session={session} />;
+            // สร้างข้อมูล Session จำลองเพื่อข้ามหน้า Login
+            const mockSession = { 
+                user: { 
+                    id: 'dummy-user-id' 
+                } 
+            };
+            
+            // ข้ามไปเรียกหน้าแอปหลัก (MainApp) ทันทีโดยไม่ต้องตรวจสอบสิทธิ์
+            return <MainApp session={mockSession} />;
         };
 
         ReactDOM.createRoot(document.getElementById('root')).render(<App />);
