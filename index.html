@@ -276,7 +276,7 @@
             const fetchProblem = useCallback(async () => {
                 setLoading(true); setStatus('idle'); setUserAnswer('');
                 const { data: solved } = await db.from('user_progress').select('problem_id').eq('user_id', session.user.id).eq('is_correct', true);
-                const solvedIds = new Set(solved.map(s => s.problem_id));
+                const solvedIds = new Set(solved ? solved.map(s => s.problem_id) : []);
                 let query = db.from('problems').select('*');
                 if (subject) query = query.eq('subject_id', subject.id);
                 if (topicFilter) query = query.eq('topic_id', topicFilter.id);
@@ -405,19 +405,19 @@
                 <div className="max-w-xl mx-auto bg-white p-8 rounded-3xl border border-gray-100 shadow-sm space-y-8">
                     <div className="flex items-center gap-6 border-b pb-8">
                         <div className="w-20 h-20 rounded-2xl bg-blue-100 flex items-center justify-center overflow-hidden border-2 border-white shadow-lg">
-                            {profile.picture_url ? <img src={profile.picture_url} className="w-full h-full object-cover" /> : <UserIcon className="text-blue-500 w-10 h-10" />}
+                            {profile?.picture_url ? <img src={profile.picture_url} className="w-full h-full object-cover" /> : <UserIcon className="text-blue-500 w-10 h-10" />}
                         </div>
                         <div>
-                            <h2 className="text-2xl font-black text-blue-900">{profile.name}</h2>
-                            <p className="text-gray-400 font-medium">{profile.email}</p>
+                            <h2 className="text-2xl font-black text-blue-900">{profile?.name || 'Guest'}</h2>
+                            <p className="text-gray-400 font-medium">{profile?.email || 'No Email'}</p>
                         </div>
                     </div>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="grid grid-cols-1 gap-4">
-                            <div><label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Name</label><input name="name" defaultValue={profile.name} className="w-full border-2 border-gray-100 p-3 rounded-xl outline-none focus:border-blue-500 transition-all" /></div>
-                            <div><label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Institute</label><input name="institute" defaultValue={profile.institute} className="w-full border-2 border-gray-100 p-3 rounded-xl outline-none focus:border-blue-500 transition-all" /></div>
-                            <div><label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Major</label><input name="major" defaultValue={profile.major} className="w-full border-2 border-gray-100 p-3 rounded-xl outline-none focus:border-blue-500 transition-all" /></div>
-                            <div><label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Picture URL</label><input name="picture_url" defaultValue={profile.picture_url} className="w-full border-2 border-gray-100 p-3 rounded-xl outline-none focus:border-blue-500 transition-all" /></div>
+                            <div><label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Name</label><input name="name" defaultValue={profile?.name} className="w-full border-2 border-gray-100 p-3 rounded-xl outline-none focus:border-blue-500 transition-all" /></div>
+                            <div><label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Institute</label><input name="institute" defaultValue={profile?.institute} className="w-full border-2 border-gray-100 p-3 rounded-xl outline-none focus:border-blue-500 transition-all" /></div>
+                            <div><label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Major</label><input name="major" defaultValue={profile?.major} className="w-full border-2 border-gray-100 p-3 rounded-xl outline-none focus:border-blue-500 transition-all" /></div>
+                            <div><label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Picture URL</label><input name="picture_url" defaultValue={profile?.picture_url} className="w-full border-2 border-gray-100 p-3 rounded-xl outline-none focus:border-blue-500 transition-all" /></div>
                         </div>
                         {message && <p className={`p-3 rounded-xl text-sm font-bold ${message.includes('Error') ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>{message}</p>}
                         <button disabled={saving} className="w-full bg-blue-900 text-white font-bold py-4 rounded-2xl hover:bg-black transition-all shadow-lg flex justify-center items-center gap-2">{saving ? <SpinnerWhite /> : 'SAVE CHANGES'}</button>
@@ -445,6 +445,7 @@
                         db.from('subjects').select('*').order('id')
                     ]);
                     if (profile) setUserProfile(profile);
+                    else setUserProfile({ name: 'Guest', picture_url: '' }); // Fallback for dummy user
                     if (subs) setSubjects(subs);
                     refreshStats();
                 };
